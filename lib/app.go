@@ -97,9 +97,7 @@ func (app *App) Connect(path string, f func(*Ctx)) {
 	app.ServeMux.Handle(path, app.CtxHandlerToHandler(f))
 }
 
-func NewApp() *App {
-
-	config := NewConfig()
+func NewApp(config Config) *App {
 
 	redisPool := &redis.Pool{
 		//MaxIdle:     0,
@@ -149,9 +147,9 @@ func (app App) Serve() {
 		IdleTimeout: 120 * time.Second,
 		Handler:     app.ServeMux,
 	}
-	fmt.Println("Listening at", app.Config.Bind)
 	err := srv.ListenAndServe()
 	if err != nil {
-		panic(fmt.Sprintf("ListenAndServe: %s", err))
+		fmt.Println("Error serving: ", err)
+		os.Exit(1)
 	}
 }

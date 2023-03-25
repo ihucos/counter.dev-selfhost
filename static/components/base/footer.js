@@ -7,43 +7,16 @@ customElements.define(
                       <section class="footer">
                         <div class="content">
                           <div class="footer-logo">
-                            <img
-                              src="/img/logotype--gray.svg"
-                              width="140"
-                              height="32"
-                              alt="Logotype"
-                            />
-                            <div class="caption gray">© 2022 Counter. All rights reserved.</div>
-                          </div>
-                          <nav class="nav-footer">
-                            <div class="nav-footer-one">
-                              <ul>
-                                <li><a href="/blog">Blog</a></li>
-                                <li><a href="mailto:hey@counter.dev" target="_blank" rel="nofollow">Feedback</a></li>
-                              </ul>
-                            </div>
-                            <div class="nav-footer-two">
-                              <ul>
-                                <li><a href="/pages/privacy.html" rel="nofollow">Privacy</a></li>
-                                <li><a href="/pages/imprint.html" rel="nofollow">Imprint</a></li>
-                              </ul>
-                            </div>
-                          </nav>
-                          <div class="footer-contacts">
-                            <div class="footer-contacts-social mb16">
-                              <a
-                                href="https://github.com/ihucos/counter.dev"
-                                class="github mr16"
-                                target="_blank"
-                                rel="nofollow"
-                              ></a>
-                              <a href="https://twitter.com/DevCounter" class="twitter" target="_blank" rel="nofollow"></a>
-                            </div>
+                            <a href="https://github.com/ihucos/counter.dev-selfhosted" target="_blank">
+                                <img
+                                  src="/img/logotype--gray.svg"
+                                  width="140"
+                                  height="32"
+                                  alt="Logotype"
+                                />
+                            </a>
                             <div class="caption gray">
-                              Have a question? –
-                              <a href="mailto:hey@counter.dev" class="caption gray underline" target="_blank" rel="nofollow"
-                                >hey@counter.dev</a
-                              >
+                                Leave a <a href="#">tip</a>!
                             </div>
                           </div>
                         </div>

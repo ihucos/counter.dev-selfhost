@@ -107,10 +107,7 @@ func init() {
 		userId := ctx.GetUserId()
 		var user models.User
 		meta := map[string]string{}
-		if ctx.R.FormValue("demo") != "" {
-			user = ctx.User("counter") // counter is the magic demo user
-			meta = map[string]string{"demo": "1"}
-		} else if sessionlessUserId != "" {
+		if sessionlessUserId != "" {
 			user = ctx.User(sessionlessUserId)
 			meta = map[string]string{"sessionless": "1"}
 		} else if userId != "" {

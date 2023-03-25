@@ -6,36 +6,12 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
-	"time"
-	"context"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/ihucos/counter.dev/utils"
 	"gorm.io/gorm"
 	uuidLib "github.com/google/uuid"
-	"github.com/mailgun/mailgun-go/v4"
 )
-
-
-var passwordRecoveryContent string = `Hello %s,
-
-You - or possibly someone else - requested to recover your account. Therefore we created an alternative temporary password.
-
-user: %s
-password: %s (Will expire in 15 minutes)
-
-Login at http://counter.dev/ and if desired change your password in the account settings. As a precaution measure please ensure the given domain is correct and that this email looks plausible.
-
-Reply if you have any questions.
-
-
-Cheers,
-
-The counter.dev team`
-
-
-var passwordRecoverySender string = "hey@counter.dev"
-var passwordRecoverSubject string = "Forgot your password?"
 
 
 var uuid2id = map[string]string{}
@@ -228,48 +204,6 @@ func (user User) VerifyPassword(password string) (bool, error) {
 	return hashedPassword != "" && hashedPassword == user.hashPassword(password), nil
 }
 
-func (user User) VerifyTmpPassword(tmpPassword string) (bool, error) {
-	hashedTmpPassword, err := redis.String(user.redis.Do("GET",
-		fmt.Sprintf("tmppwd:%s", user.Id)))
-	if err == redis.ErrNil {
-		return false, nil
-	} else if err != nil {
-		return false, err
-	}
-	return hashedTmpPassword != "" && hashedTmpPassword == user.hashPassword(tmpPassword), nil
-}
-
-
-func (user User) VerifyPasswordOrTmpPassword(password string) (bool, error) {
-
-	// validate as password
-	passwordOk, err := user.VerifyPassword(password)
-	if err != nil {
-		return false, err
-	}
-	if passwordOk {
-		return passwordOk, nil
-	}
-
-	// or validate as temporary password
-	tmpPasswordOk, err := user.VerifyTmpPassword(password)
-	if err != nil {
-		return false, err
-	}
-	if tmpPasswordOk {
-		return tmpPasswordOk, nil
-	}
-	return false, nil
-}
-
-func (user User) NewTmpPassword() (string, error) {
-	expire := 60 * 15  // 15 minutes
-	tmpPassword := base64.URLEncoding.EncodeToString([]byte(randToken()[:8]))
-	_, err := user.redis.Do("SETEX",
-		fmt.Sprintf("tmppwd:%s", user.Id), expire, user.hashPassword(tmpPassword))
-	return tmpPassword, err
-}
-
 func (user User) VerifyToken(token string) (bool, error) {
 	dbToken, err := user.ReadToken()
 	if err == redis.ErrNil {
@@ -384,50 +318,4 @@ func (user User) HandleSignals(conn redis.Conn, cb func(error)) {
 			cb(v)
 		}
 	}
-}
-
-
-func (user User) PasswordRecovery(mailgunSecretApiKey string) error {
-	mail, err := user.GetPref("mail")
-	if err != nil {
-		return err
-	}
-	tmppwd, err := user.NewTmpPassword()
-	if err != nil {
-		return err
-	}
-	mg := mailgun.NewMailgun("counter.dev", mailgunSecretApiKey)
-
-	body := fmt.Sprintf(passwordRecoveryContent, user.Id, user.Id, tmppwd)
-	message := mg.NewMessage(passwordRecoverySender, passwordRecoverSubject, body, mail)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-	defer cancel()
-
-	_, _, err = mg.Send(ctx, message)
-
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-
-func (user User) RegisterSubscriptionID(subscriptionID string) error{
-	_, err := user.redis.Do("HSET", "subscription", user.Id, subscriptionID)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-
-func (user User) ReadSubscriptionID() (string, error) {
-	val, err := redis.String(user.redis.Do("HGET", "subscription", user.Id))
-	if err == redis.ErrNil {
-		return "", nil
-	} else if err != nil {
-		return "", err
-	}
-	return val, nil
 }

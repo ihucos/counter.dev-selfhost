@@ -135,7 +135,6 @@ document.addEventListener("push-dump", (evt) => {
 
 document.addEventListener("push-dump", (evt) => {
     var dump = evt.detail;
-    patchDump(dump)
     document.dispatchEvent(new CustomEvent("redraw", { detail: dump }));
 });
 
@@ -156,69 +155,6 @@ document.addEventListener("push-oldest-archive-date", (evt) => {
         drs.draw(evt.detail || moment().format('YYYY-MM-DD'))
     })
 })
-
-function patchArchiveVisit(visit){
-    if (!visit.ref) {visit.ref = {}}
-    return visit
-
-}
-
-
-function patchDump(dump){
-    addArchivesToDump(window.state.archives, dump);
-    addDaterangeToDump(window.state.daterange || {}, dump)
-
-}
-
-function addArchivesToDump(archives, dump) {
-    for (const site of Object.keys(dump.sites)) {
-
-        dump.sites[site].visits.last7 =  patchArchiveVisit(mergeVisits([
-            dump.sites[site].visits.day,
-            dump.sites[site].visits.yesterday,
-            archives["-7:-2"][site] || {},
-        ]));
-
-        dump.sites[site].visits.last30 = patchArchiveVisit(mergeVisits([
-            dump.sites[site].visits.day,
-            dump.sites[site].visits.yesterday,
-            archives["-30:-2"][site] || {},
-        ]));
-
-    }
-    return dump
-}
-
-
-function addDaterangeToDump(daterange, dump) {
-    for (const site of Object.keys(dump.sites)){
-        let siteData = daterange[site]
-        let nildata = Object.fromEntries(Object.keys(dump.sites[site].visits.all).map((k)=>[k, {}]))
-        if (siteData){
-            dump.sites[site].visits.daterange = {...nildata, ...siteData}
-        } else {
-            dump.sites[site].visits.daterange = nildata
-        }
-    }
-}
-
-function mergeVisits(visits) {
-    let merged = {};
-    for (const visit of visits) {
-        for (const [dimension, typesWithCount] of Object.entries(visit)) {
-            for (const [type, count] of Object.entries(typesWithCount)) {
-                if (!(dimension in merged)) {
-                    merged[dimension] = {};
-                }
-                if (!(type in merged[dimension])) {
-                    merged[dimension][type] = 0;
-                }
-                merged[dimension][type] += count;
-            }
-        }
-    }
-    return merged;
-}
 
 function drawComponents() {
     var source = dispatchPushEvents(getDumpURL());
@@ -429,14 +365,3 @@ function dGetNormalizedHours(hours) {
         ...formatedHours,
     };
 }
-
-whenReady('base-navbar', (el)=>{
-    el.loggedInUserCallback((userDump) => {
-        // user loaded
-        var daysTracked = Math.max(...Object.values(userDump.sites).map((i)=>Object.keys(i.visits.all.date).length))
-        if (daysTracked > 90 && sessionStorage.getItem('pwyw') === null && (!userDump.user.isSubscribed)){
-            whenReady('base-pwyw', (el)=>el.modal())
-            sessionStorage.setItem('pwyw', '1')
-        }
-    }, () => {})
-})

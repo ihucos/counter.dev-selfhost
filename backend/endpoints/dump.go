@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/ihucos/counter.dev/utils"
 	"github.com/ihucos/counter.dev/lib"
 	"github.com/ihucos/counter.dev/models"
 )
@@ -14,7 +13,6 @@ type UserDump struct {
 	Id    string            `json:"id"`
 	Token string            `json:"token"`
 	UUID string            `json:"uuid"`
-	IsSubscribed bool `json:"isSubscribed"`
 	Prefs map[string]string `json:"prefs"`
 }
 
@@ -78,11 +76,10 @@ func LoadUserDump(user models.User) (UserDump, error) {
 	if err != nil {
 		return UserDump{}, err
 	}
-	subscriptionId, err := user.ReadSubscriptionID()
 	if err != nil {
 		return UserDump{}, err
 	}
-	return UserDump{Id: user.Id, Token: token, UUID: uuid, Prefs: prefsData, IsSubscribed: subscriptionId != ""}, nil
+	return UserDump{Id: user.Id, Token: token, UUID: uuid, Prefs: prefsData}, nil
 }
 
 func LoadDump(user models.User, utcOffset int) (Dump, error) {
@@ -127,35 +124,7 @@ func init() {
 
 		user.TouchDump()
 
-		archive := make(map[string]lib.QueryArchiveResult) 
-		now := utils.TimeNow(utcOffset)
 		var err error
-
-		archive["-7:-2"], err = ctx.App.QueryArchive(lib.QueryArchiveArgs{
-			User:     user.Id,
-			DateFrom: now.AddDate(0, 0, -7),
-			DateTo:   now.AddDate(0, 0, -2),
-		})
-		ctx.CatchError(err)
-
-		archive["-30:-2"], err = ctx.App.QueryArchive(lib.QueryArchiveArgs{
-			User:     user.Id,
-			DateFrom: now.AddDate(0, 0, -30),
-			DateTo:   now.AddDate(0, 0, -2),
-		})
-		ctx.CatchError(err)
-
-		oldestArchiveDate, err := ctx.App.QueryArchiveOldestDate(user.Id)
-		ctx.CatchError(err)
-
-
-		ctx.SendEventSourceData(EventSourceData{
-			Type:    "oldest-archive-date",
-			Payload: oldestArchiveDate})
-
-		ctx.SendEventSourceData(EventSourceData{
-			Type:    "archive",
-			Payload: archive})
 
 		sendDump := func() {
 			dump, err := LoadDump(user, utcOffset)

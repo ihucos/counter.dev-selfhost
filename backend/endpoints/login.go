@@ -15,7 +15,7 @@ func init() {
 
 		user := ctx.User(userId)
 
-		passwordOk, err := user.VerifyPasswordOrTmpPassword(passwordInput)
+		passwordOk, err := user.VerifyPassword(passwordInput)
 		ctx.CatchError(err)
 
 		if passwordOk {

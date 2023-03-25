@@ -59,12 +59,6 @@ customElements.define(
               rangePref === "yesterday" ? "selected=selected" : ""
           } value="yesterday">Yesterday</option>
           <option ${
-              rangePref === "last7" ? "selected=selected" : ""
-          } value="last7">Last 7 days</option>
-          <option ${
-              rangePref === "last30" ? "selected=selected" : ""
-          } value="last30">Last 30 days</option>
-          <option ${
               rangePref === "month" ? "selected=selected" : ""
           } value="month">This month</option>
           <option ${
@@ -73,9 +67,6 @@ customElements.define(
           <option ${
               rangePref === "all" ? "selected=selected" : ""
           } value="all">All time</option>
-        <option ${
-            rangePref === "daterangeset" ? "selected=selected" : ""
-        } value="daterangeset">Custom date range...</option>
         </select>`;
 
             this.updateFavicon();

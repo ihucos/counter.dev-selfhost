@@ -2,8 +2,11 @@ package lib
 
 import (
 	"fmt"
+	rand "crypto/rand"
+	"encoding/hex"
 	"os"
 	"time"
+	"github.com/gomodule/redigo/redis"
 )
 
 type Config struct {
@@ -11,9 +14,6 @@ type Config struct {
 	Bind         string
 	CookieSecret []byte
 	PasswordSalt []byte
-	ArchiveDatabase string
-	ArchiveMaxAge time.Duration
-	MailgunSecretApiKey string
 }
 
 func env(env string) string {
@@ -41,15 +41,43 @@ func envDuration(envName string) time.Duration {
 	return duration
 }
 
-func NewConfigFromEnv() Config {
+func getSecret(conn redis.Conn, key string) string{
+
+	// generate secret token
+	tokenLength := 64 
+	tokenBytes := make([]byte, tokenLength)
+	_, err := rand.Read(tokenBytes)
+	if err != nil {
+		panic(err)
+	}
+	newSecret := hex.EncodeToString(tokenBytes)
+
+	// set new secret only if it does not exist yet
+	_, err = redis.String(conn.Do("SET", key, newSecret, "NX"))
+	if err != redis.ErrNil {
+		panic(err)
+	}
+
+	// get the saved secret token
+	secret, err := redis.String(conn.Do("GET", key))
+	if err != nil {
+		panic(err)
+	}
+	return secret
+}
+
+func NewConfig() Config {
+	redisUrl := envDefault("COUNTER_REDIS_URL", "redis://localhost:6379")
+	conn, err := redis.DialURL(redisUrl)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
 	return Config{
-		RedisUrl:     envDefault("WEBSTATS_REDIS_URL", "redis://localhost:6379"),
-		Bind:         envDefault("WEBSTATS_BIND", ":8000"),
-		CookieSecret: []byte(env("WEBSTATS_COOKIE_SECRET")),
-		PasswordSalt: []byte(env("WEBSTATS_PASSWORD_SALT")),
-		ArchiveDatabase: env("WEBSTATS_ARCHIVE_DATABASE"),
-		ArchiveMaxAge: envDuration("WEBSTATS_ARCHIVE_MAX_AGE"),
-		MailgunSecretApiKey:     envDefault("WEBSTATS_MAILGUN_SECRET_API_KEY", "dummy"),
+		RedisUrl:     redisUrl,
+		Bind:         envDefault("COUNTER_BIND", ":8080"),
+		CookieSecret: []byte(getSecret(conn, "cntr:config:cookie_secret")),
+		PasswordSalt: []byte(getSecret(conn, "cntr:config:password_salt")),
 	}
 
 }

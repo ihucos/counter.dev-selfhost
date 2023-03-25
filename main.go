@@ -10,7 +10,7 @@ import (
 )
 
 
-//go:embed static
+//go:embed all:static
 var staticFS embed.FS
 
 func main() {

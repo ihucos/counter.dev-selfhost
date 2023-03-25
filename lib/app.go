@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"embed"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -76,7 +77,11 @@ func (app *App) ConnectEndpoints(staticFS embed.FS) {
 	for endpoint, handler := range endpoints {
 		app.Connect(endpoint, handler)
 	}
-	app.ServeMux.Handle("/", http.FileServer(http.FS(staticFS)))
+	serveFs, err := fs.Sub(staticFS, "static")
+	if err != nil {
+		panic(err)
+	}
+	app.ServeMux.Handle("/", http.FileServer(http.FS(serveFs)))
 
 }
 
@@ -94,7 +99,7 @@ func (app *App) Connect(path string, f func(*Ctx)) {
 
 func NewApp() *App {
 
-	config := NewConfigFromEnv()
+	config := NewConfig()
 
 	redisPool := &redis.Pool{
 		//MaxIdle:     0,

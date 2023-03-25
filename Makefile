@@ -45,7 +45,7 @@ build:
 
 .PHONY: buildlocal
 buildlocal:
-	go build -o ../webstats
+	go build -o webstats
 
 .PHONY: deploy
 deploy:

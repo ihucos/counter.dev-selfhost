@@ -3,10 +3,15 @@ package main
 import (
 	"fmt"
 	"syscall"
+	"embed"
 
 	_ "github.com/ihucos/counter.dev/endpoints"
 	"github.com/ihucos/counter.dev/lib"
 )
+
+
+//go:embed static
+var staticFS embed.FS
 
 func main() {
 
@@ -20,7 +25,7 @@ func main() {
 	}
 
 	app := lib.NewApp()
-	app.ConnectEndpoints()
+	app.ConnectEndpoints(staticFS)
 	app.Logger.Println("Start")
 	app.Serve()
 }

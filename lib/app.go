@@ -3,6 +3,7 @@ package lib
 import (
 	"errors"
 	"fmt"
+	"embed"
 	"io"
 	"net/http"
 	"os"
@@ -17,6 +18,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/sessions"
 )
+
 
 type appAdapter struct {
 	App *App
@@ -70,10 +72,12 @@ type App struct {
 	Config       Config
 }
 
-func (app *App) ConnectEndpoints() {
+func (app *App) ConnectEndpoints(staticFS embed.FS) {
 	for endpoint, handler := range endpoints {
 		app.Connect(endpoint, handler)
 	}
+	app.ServeMux.Handle("/", http.FileServer(http.FS(staticFS)))
+
 }
 
 func (app *App) NewContext(w http.ResponseWriter, r *http.Request) *Ctx {
@@ -111,13 +115,14 @@ func NewApp() *App {
 
 	serveMux := http.NewServeMux()
 	//fs := http.FileServer(http.Dir("./static"))
-	serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" {
-			http.ServeFile(w, r, "./static/dashboard.html")
-		} else {
-			http.ServeFile(w, r, "./static"+r.URL.Path)
-		}
-	})
+	//serveMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	//	if r.URL.Path == "/" {
+	//		//http.ServeFile(w, r, "./static/dashboard.html")
+	//	} else {
+	//		//http.ServeFile(w, r, "./static"+r.URL.Path)
+	//	}
+	//})
+
 	app := &App{
 		RedisPool:    redisPool,
 		SessionStore: sessionStore,

@@ -1,22 +1,24 @@
 
-# Counter self hosted
+# counter.dev self hosted
 
-An attempt to self host https://github.com/ihucos/counter.dev
+This is the official way to self host [Counter Web Analytics](https://counter.dev/).
 
-In Progress
-
+Please note:
+- The self-hosted version is maturing and can be currenlty considered beta
+- There might be some 
 
 # Quickstart
 
 ## 1. Install
 ```
-$ curl https://github.com/ihucos/counter.dev-selfhosted/releases/download/0.1/cntr-linux-amd64 > /usr/local/bin/cntr
+$ curl https://github.com/ihucos/counter.dev-selfhosted/releases/download/0.2/cntr-linux-amd64 > /usr/local/bin/cntr
 $ chmod +x /usr/local/bin/cntr
 ```
 
 ## 2. Create user
+Utc offset is your timezones utc offset. Ask ChatGPT.
 ```
-$ cntr createuser --redis-url redis://localhost:6379 admin
+$ cntr createuser --redis-url redis://localhost:6379 --utc-offset 2 admin
 Password for new user:
 ```
 

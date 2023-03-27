@@ -30,7 +30,7 @@ $ cntr serve --redis-url redis://localhost:6379 --bind :80
 ```
 
 ## 4. Go to UI
-Visit the fired up server, login and follow the integrations steps there.
+Visit the fired up server, login and follow the integrations steps for your website there.
 
 # Screenshots
 

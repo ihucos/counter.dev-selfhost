@@ -40,7 +40,7 @@ Visit the fired up server, login and follow the integrations steps for your webs
 
 # Technical Description
 
-Redis is the primary database. With Golang all static assets are nicely inside a single binary which you just need to run at your server. Everything basically works exactly as in the [hosted version of this project[(https://github.com/ihucos/counter.dev), consult it's README.
+Redis is the primary database. With Golang all static assets are nicely inside a single binary which you just need to run at your server. Everything basically works exactly as in the [hosted version of this project](https://github.com/ihucos/counter.dev), consult it's README.
 
 
 # I forgot my password.

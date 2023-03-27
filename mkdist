@@ -1,0 +1,3 @@
+set -ex
+mkdir -p dist
+GOOS=linux GOARCH=amd64 go build -o dist/cntr-linux-amd64

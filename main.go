@@ -74,14 +74,14 @@ func NewUser(app *lib.App, userID string) models.User {
 
 func main() {
 
+	redis_flag := &cli.StringFlag{
+		Name:  "redis-url",
+		Value: "redis://localhost:6379",
+		Usage: "Which redis server to connect to",
+	}
+
 	cliApp := &cli.App{
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "redis-url",
-				Value: "redis://localhost:6379",
-				Usage: "Which redis server to connect to",
-			},
-		},
+		Flags: []cli.Flag{redis_flag},
 		Commands: []*cli.Command{
 			{
 				Name:  "serve",
@@ -92,6 +92,7 @@ func main() {
 						Value: ":80",
 						Usage: "host:port to bind server to",
 					},
+					redis_flag,
 				},
 				Action: func(cCtx *cli.Context) error {
 
@@ -115,6 +116,7 @@ func main() {
 				Name:  "createuser",
 				Usage: "Create a new user",
 				ArgsUsage: "<username>",
+				Flags: []cli.Flag{redis_flag},
 				Action: func(cCtx *cli.Context) error {
 					if cCtx.NArg() < 1 {
 						fmt.Println("Missing argument: user")
@@ -135,6 +137,7 @@ func main() {
 				Name:  "chgpwd",
 				Usage: "Change a users password",
 				ArgsUsage: "<username>",
+				Flags: []cli.Flag{redis_flag},
 				Action: func(cCtx *cli.Context) error {
 					if cCtx.NArg() < 1 {
 						fmt.Println("Missing argument: user")

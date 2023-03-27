@@ -34,3 +34,9 @@ Visit the fired up server, login and follow the integrations steps there.
 
 <img width="1440" alt="Screenshot 2023-03-26 at 21 24 30" src="https://user-images.githubusercontent.com/2066372/227825733-118fb7c8-c1af-4af0-8bc9-7f38b0af53c0.png">
 
+# I forgot my password.
+
+Keep calm and don't email me. Run this on your server:
+```
+$ cntr chgpwd --redis-url redis://localhost:6379 youruser
+```

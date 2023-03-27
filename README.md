@@ -45,7 +45,7 @@ Redis is the primary database. With Golang all static assets are nicely inside a
 
 # I forgot my password.
 
-Keep calm and don't email me. Run this on your server:
+Keep calm and don't email me. Run this at your server:
 ```
 $ cntr chgpwd --redis-url redis://localhost:6379 youruser
 ```

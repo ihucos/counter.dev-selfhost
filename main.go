@@ -1,19 +1,18 @@
 package main
 
 import (
+	rand "crypto/rand"
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"syscall"
-	rand "crypto/rand"
-	"encoding/hex"
 
-	_ "github.com/ihucos/counter.dev/endpoints"
 	"github.com/gomodule/redigo/redis"
+	_ "github.com/ihucos/counter.dev/endpoints"
 	"github.com/ihucos/counter.dev/lib"
 	"github.com/ihucos/counter.dev/models"
 	"golang.org/x/term"
-
 
 	"github.com/urfave/cli/v2"
 )
@@ -21,12 +20,10 @@ import (
 //go:embed all:static
 var staticFS embed.FS
 
-
-
-func getSecret(conn redis.Conn, key string) string{
+func getSecret(conn redis.Conn, key string) string {
 
 	// generate secret token
-	tokenLength := 64 
+	tokenLength := 64
 	tokenBytes := make([]byte, tokenLength)
 	_, err := rand.Read(tokenBytes)
 	if err != nil {
@@ -71,7 +68,6 @@ func NewUser(app *lib.App, userID string) models.User {
 	return models.NewUser(conn, userID, app.Config.PasswordSalt)
 }
 
-
 func main() {
 
 	redis_flag := &cli.StringFlag{
@@ -113,10 +109,16 @@ func main() {
 				},
 			},
 			{
-				Name:  "createuser",
-				Usage: "Create a new user",
+				Name:      "createuser",
+				Usage:     "Create a new user",
 				ArgsUsage: "<username>",
-				Flags: []cli.Flag{redis_flag},
+				Flags: []cli.Flag{redis_flag,
+					&cli.IntFlag{
+						Required: true,
+						Name:  "utc-offset",
+						Usage: "Specify your favorite timezones utc offset",
+					},
+				},
 				Action: func(cCtx *cli.Context) error {
 					if cCtx.NArg() < 1 {
 						fmt.Println("Missing argument: user")
@@ -130,14 +132,18 @@ func main() {
 					if err != nil {
 						return err
 					}
-					return user.Create(string(password))
+					err = user.Create(string(password))
+					if err != nil {
+						return err
+					}
+					return user.SetPref("utcoffset", cCtx.String("utc-offset"))
 				},
 			},
 			{
-				Name:  "chgpwd",
-				Usage: "Change a users password",
+				Name:      "chgpwd",
+				Usage:     "Change a users password",
 				ArgsUsage: "<username>",
-				Flags: []cli.Flag{redis_flag},
+				Flags:     []cli.Flag{redis_flag},
 				Action: func(cCtx *cli.Context) error {
 					if cCtx.NArg() < 1 {
 						fmt.Println("Missing argument: user")
@@ -155,7 +161,6 @@ func main() {
 					return user.ChangePassword(string(newPassword))
 				},
 			},
-
 		},
 	}
 

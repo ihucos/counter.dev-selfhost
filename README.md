@@ -1,12 +1,12 @@
 
-# counter.dev self hosted
+# Self-Hosted [Counter Web Analytics](https://github.com/ihucos/counter.dev)
 
-This is the official way to self host [Counter Web Analytics](https://counter.dev/).
+This is the official way to self host [counter.dev](https://counter.dev/).
 
 Please note:
 - The self-hosted version is maturing and can be currenlty considered **beta**
 - Due to complexity constraints in this iteration the archiving functionality is not implemented.
-- Create a issue if there is anything
+- Please create an issue if there is anything
 
 # Quickstart
 

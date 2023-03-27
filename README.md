@@ -4,8 +4,9 @@
 This is the official way to self host [Counter Web Analytics](https://counter.dev/).
 
 Please note:
-- The self-hosted version is maturing and can be currenlty considered beta
-- There might be some 
+- The self-hosted version is maturing and can be currenlty considered **beta**
+- Due to complexity constraints in this iteration the archiving functionality is not implemented.
+- Create a issue if there is anything
 
 # Quickstart
 
@@ -16,11 +17,12 @@ $ chmod +x /usr/local/bin/cntr
 ```
 
 ## 2. Create user
-"Utc offset" is your timezones utc offset.
 ```
 $ cntr createuser --redis-url redis://localhost:6379 --utc-offset 2 admin
 Password for new user:
 ```
+("Utc offset" is your timezones utc offset.)
+
 
 ## 3. Serve
 ```

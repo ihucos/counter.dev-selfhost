@@ -26,8 +26,8 @@ customElements.define(
                               ></a>
                               <a href="https://twitter.com/DevCounter" class="twitter" target="_blank" rel="nofollow"></a>
                             </div>
-                            <div class="caption gray">
-                              You are logged in as asdf – <a href="/logout" class="caption gray underline">Logout</a>
+                            <div class="caption gray has-user" style="display: none;">
+                              You are logged in as <span class="fill-username"></span> – <a href="/logout" class="caption gray underline">Logout</a>
                             </div>
                           </div>
                         </div>

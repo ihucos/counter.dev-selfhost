@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"fmt"
-	"log"
 	"os"
 	"syscall"
 	rand "crypto/rand"
@@ -12,6 +11,9 @@ import (
 	_ "github.com/ihucos/counter.dev/endpoints"
 	"github.com/gomodule/redigo/redis"
 	"github.com/ihucos/counter.dev/lib"
+	"github.com/ihucos/counter.dev/models"
+	"golang.org/x/term"
+
 
 	"github.com/urfave/cli/v2"
 )
@@ -46,11 +48,40 @@ func getSecret(conn redis.Conn, key string) string{
 	return secret
 }
 
+func getApp(cCtx *cli.Context) *lib.App {
+	conn, err := redis.DialURL(cCtx.String("redis-url"))
+	if err != nil {
+		fmt.Printf("Can't connect to redis server at %s - %s\n", cCtx.String("redis-url"), err)
+		os.Exit(1)
+	}
+	defer conn.Close()
+	return lib.NewApp(
+		lib.Config{
+			RedisUrl:     cCtx.String("redis-url"),
+			Bind:         cCtx.String("bind"),
+			CookieSecret: []byte(getSecret(conn, "cntr:config:cookie_secret")),
+			PasswordSalt: []byte(getSecret(conn, "cntr:config:password_salt")),
+		},
+	)
+
+}
+
+func NewUser(app *lib.App, userID string) models.User {
+	conn := app.RedisPool.Get()
+	return models.NewUser(conn, userID, app.Config.PasswordSalt)
+}
 
 
 func main() {
 
-	app := &cli.App{
+	cliApp := &cli.App{
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "redis-url",
+				Value: "redis://localhost:6379",
+				Usage: "Which redis server to connect to",
+			},
+		},
 		Commands: []*cli.Command{
 			{
 				Name:  "serve",
@@ -60,11 +91,6 @@ func main() {
 						Name:  "bind",
 						Value: ":80",
 						Usage: "host:port to bind server to",
-					},
-					&cli.StringFlag{
-						Name:  "redis-url",
-						Value: "redis://localhost:6379",
-						Usage: "Which redis server to connect to",
 					},
 				},
 				Action: func(cCtx *cli.Context) error {
@@ -78,31 +104,61 @@ func main() {
 						fmt.Println("Error Setting Rlimit ", err)
 					}
 
-
-					conn, err := redis.DialURL(cCtx.String("redis-url"))
-					if err != nil {
-						fmt.Printf("Can't connect to redis server at %s - %s\n", cCtx.String("redis-url"), err)
-						os.Exit(1)
-					}
-
-					counterApp := lib.NewApp(
-						lib.Config{
-							RedisUrl:     cCtx.String("redis-server"),
-							Bind:         cCtx.String("bind"),
-							CookieSecret: []byte(getSecret(conn, "cntr:config:cookie_secret")),
-							PasswordSalt: []byte(getSecret(conn, "cntr:config:password_salt")),
-						},
-					)
-					counterApp.ConnectEndpoints(staticFS)
-					counterApp.Logger.Println("Listening at", cCtx.String("bind"))
-					counterApp.Serve()
+					app := getApp(cCtx)
+					app.ConnectEndpoints(staticFS)
+					app.Logger.Println("Listening at", cCtx.String("bind"))
+					app.Serve()
 					return nil
 				},
 			},
+			{
+				Name:  "createuser",
+				Usage: "Create a new user",
+				ArgsUsage: "<username>",
+				Action: func(cCtx *cli.Context) error {
+					if cCtx.NArg() < 1 {
+						fmt.Println("Missing argument: user")
+						os.Exit(1)
+					}
+					app := getApp(cCtx)
+					user := NewUser(app, cCtx.Args().Get(0))
+					fmt.Print("Password for new user: ")
+					password, err := term.ReadPassword(0)
+					fmt.Print("\n")
+					if err != nil {
+						return err
+					}
+					return user.Create(string(password))
+				},
+			},
+			{
+				Name:  "chgpwd",
+				Usage: "Change a users password",
+				ArgsUsage: "<username>",
+				Action: func(cCtx *cli.Context) error {
+					if cCtx.NArg() < 1 {
+						fmt.Println("Missing argument: user")
+						os.Exit(1)
+					}
+					app := getApp(cCtx)
+					userID := cCtx.Args().Get(0)
+					user := NewUser(app, userID)
+					fmt.Printf("New password user %s: ", userID)
+					newPassword, err := term.ReadPassword(0)
+					fmt.Print("\n")
+					if err != nil {
+						return err
+					}
+					return user.ChangePassword(string(newPassword))
+				},
+			},
+
 		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+	if err := cliApp.Run(os.Args); err != nil {
+		fmt.Println("error:", err)
+		os.Exit(1)
+
 	}
 }

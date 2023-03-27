@@ -16,7 +16,7 @@ $ chmod +x /usr/local/bin/cntr
 ```
 
 ## 2. Create user
-Utc offset is your timezones utc offset. Ask ChatGPT.
+"Utc offset" is your timezones utc offset. Ask ChatGPT.
 ```
 $ cntr createuser --redis-url redis://localhost:6379 --utc-offset 2 admin
 Password for new user:

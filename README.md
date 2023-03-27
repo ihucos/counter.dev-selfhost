@@ -25,6 +25,5 @@ Password for new user:
 $ cntr serve --redis-url redis://localhost:6379 --bind :80
 ```
 
-
-## Manage your own server
-Or try the version hosted by me: https://counter.dev/
+## Go to UI
+Visit the fired up server, login and follow the integrations steps there.

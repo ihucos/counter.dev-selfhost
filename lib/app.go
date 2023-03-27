@@ -81,8 +81,13 @@ func (app *App) ConnectEndpoints(staticFS embed.FS) {
 	if err != nil {
 		panic(err)
 	}
-	app.ServeMux.Handle("/", http.FileServer(http.FS(serveFs)))
-
+	app.ServeMux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" {
+			http.Redirect(w, r, "/welcome.html", http.StatusTemporaryRedirect)
+			return
+		}
+		http.FileServer(http.FS(serveFs)).ServeHTTP(w, r)
+	}))
 }
 
 func (app *App) NewContext(w http.ResponseWriter, r *http.Request) *Ctx {

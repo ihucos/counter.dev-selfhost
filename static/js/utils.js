@@ -93,3 +93,14 @@ function whenReady(tag, cb){
         cb(el)
     })
 }
+
+function fillUser(user) {
+    document
+        .querySelectorAll(".has-user")
+        .forEach((el) => (el.style.display = "block"));
+    Array.from(
+        document.getElementsByClassName("fill-username")
+    ).forEach((el) => {
+        el.innerHTML = escapeHtml(user);
+    });
+}

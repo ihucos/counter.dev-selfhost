@@ -38,6 +38,11 @@ Visit the fired up server, login and follow the integrations steps for your webs
 
 <img width="1440" alt="Screenshot 2023-03-26 at 21 24 30" src="https://user-images.githubusercontent.com/2066372/227825733-118fb7c8-c1af-4af0-8bc9-7f38b0af53c0.png">
 
+# Technical Description
+
+Redis is the primary database. With Golang all static assets are nicely inside a single binary which you just need to run at your server. Everything basically works exactly as in the [hosted version of this project[(https://github.com/ihucos/counter.dev), consult it's README.
+
+
 # I forgot my password.
 
 Keep calm and don't email me. Run this on your server:

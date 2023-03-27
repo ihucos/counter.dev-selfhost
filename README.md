@@ -27,3 +27,10 @@ $ cntr serve --redis-url redis://localhost:6379 --bind :80
 
 ## Go to UI
 Visit the fired up server, login and follow the integrations steps there.
+
+# Screenshots
+
+<img width="1440" alt="Screenshot 2023-03-26 at 21 21 36" src="https://user-images.githubusercontent.com/2066372/227825413-307290db-2d38-4443-adbb-e22df6304c73.png">
+
+<img width="1440" alt="Screenshot 2023-03-26 at 21 24 30" src="https://user-images.githubusercontent.com/2066372/227825733-118fb7c8-c1af-4af0-8bc9-7f38b0af53c0.png">
+

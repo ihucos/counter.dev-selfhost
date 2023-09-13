@@ -14,6 +14,9 @@ func init() {
 		// directory. In the deployment static files are taking from
 		// /state/static. This means NEW components files need to be
 		// manually touched after a deploy. As a workaround
+
+		ctx.W.Header().Set("Content-Type", "text/javascript")
+
 		files1, err := filepath.Glob("./static/components/*.js")
 		ctx.CatchError(err)
 		files2, err := filepath.Glob("./static/components/*/*.js")
